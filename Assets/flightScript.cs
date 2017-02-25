@@ -8,6 +8,10 @@ public class flightScript : MonoBehaviour {
     public Transform broom;
     private Transform BroomParent;
    public bool TouchingBroom = false;
+    [SerializeField]
+    float CurSpeed;
+    [SerializeField]
+    float SpeedMult=2.0f;
     // Use this for initialization
     void Start () {
         controller = GetComponent<SteamVR_TrackedController>();
@@ -43,13 +47,17 @@ public class flightScript : MonoBehaviour {
             TouchingBroom = false;
       
     }
-    void Update () {
-            rb.velocity = Speed * broom.forward;
+    void FixedUpdate () {
+        CurSpeed = Speed;
         if(controller.triggerPressed && TouchingBroom==true)
         {
             broom.transform.LookAt(transform);
             // broom.transform.rotation = gameObject.transform.rotation;
+             if(controller.gripped)
+            {
+                CurSpeed *= SpeedMult;
+            }
         }
-       
+            rb.velocity = CurSpeed * Time.deltaTime * broom.forward;
 	}
 }

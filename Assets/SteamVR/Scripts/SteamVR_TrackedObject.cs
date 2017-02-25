@@ -94,7 +94,6 @@ public class SteamVR_TrackedObject : MonoBehaviour
 
 	public void SetDeviceIndex(int index)
 	{
-
 		if (System.Enum.IsDefined(typeof(EIndex), index))
 			this.index = (EIndex)index;
 	}

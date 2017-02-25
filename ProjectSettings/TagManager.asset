@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 2
   tags:
   - Broom
+  - Terrain
+  - Box
   layers:
   - Default
   - TransparentFX
@@ -20,8 +22,8 @@ TagManager:
   - MazeTurretBullet
   - Bg
   - FPSWeapon
-  - 
-  - 
+  - ViveBox
+  - Terrain
   - 
   - 
   - 

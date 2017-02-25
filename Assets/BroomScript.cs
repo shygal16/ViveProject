@@ -2,20 +2,26 @@
 using System.Collections;
 
 public class BroomScript : MonoBehaviour {
-   public Transform start;
-    public float offset = 10;
-   //public Transform Middle;
+   public Transform CameraLocation;
 
-	// Use this for initialization
-	void Awake () {
-        start = GameObject.FindGameObjectWithTag("MainCamera").transform;
-        start.position.Set(start.position.x, start.position.y- offset, start.position.z-8);
-        transform.position = start.position;
-	}
+    public float offsetY = 10;
+    public float offsetZ = 10;
+    public float offsetX = 10;
+    //public Transform Middle;
+
+    // Use this for initialization
+    void Awake () {
+        // gameObject.transform.position = CameraLocation.position;
+        CameraLocation = GameObject.FindGameObjectWithTag("MainCamera").transform;
+    }
 	
 	// Update is called once per frame
     
 	void Update () {
-        transform.position = start.position;
+        //transform.position = CameraLocation.position;
+      
+        Vector3 newpos=new Vector3(CameraLocation.position.x-offsetX,CameraLocation.position.y- offsetY, CameraLocation.position.z- offsetZ);
+        gameObject.transform.position=newpos;
+        
     }
     }
