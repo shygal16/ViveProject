@@ -14,8 +14,8 @@ GameObject:
   - 114: {fileID: 11414176}
   - 54: {fileID: 5416410}
   m_Layer: 0
-  m_Name: IceBall
-  m_TagString: IceBall
+  m_Name: FireBall
+  m_TagString: FireBall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -28,7 +28,7 @@ Transform:
   m_GameObject: {fileID: 160572}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 194.85013, y: 6.384411, z: 316.364}
-  m_LocalScale: {x: 0.16978508, y: 0.16978508, z: 0.16978508}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 0}
@@ -43,7 +43,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_Materials:
-  - {fileID: 2100000, guid: 130282c03a8291e4cb46778556f7a977, type: 2}
+  - {fileID: 2100000, guid: 9cca973a1c732b54fad70a4ad296007a, type: 2}
   m_SubsetIndices: 
   m_StaticBatchRoot: {fileID: 0}
   m_UseLightProbes: 1

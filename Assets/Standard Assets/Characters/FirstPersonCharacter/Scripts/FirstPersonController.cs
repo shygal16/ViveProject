@@ -10,6 +10,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
     [RequireComponent(typeof (AudioSource))]
     public class FirstPersonController : MonoBehaviour
     {
+        
         [SerializeField] private bool m_IsWalking;
         [SerializeField] private float m_WalkSpeed;
         [SerializeField] private float m_RunSpeed;
@@ -28,7 +29,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         [SerializeField] private AudioClip m_JumpSound;           // the sound played when character leaves the ground.
         [SerializeField] private AudioClip m_LandSound;           // the sound played when character touches back on ground.
         [SerializeField]
-        private Camera m_Camera;
+        public Camera m_Camera;
         private bool m_Jump;
         private float m_YRotation;
         private Vector2 m_Input;
@@ -41,12 +42,21 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private float m_NextStep;
         private bool m_Jumping;
         private AudioSource m_AudioSource;
+        
+        public Rigidbody rb;
 
+        public GameObject Projectile;
+        public GameObject TargetTip;
+        public float ProjectileSpeed = 10;
+        public float Firedelay = 0.5f;
+        private float FireTimer = 0;
+        private float Stamina = 10;
+        private float StaminaTimer = 0;
         // Use this for initialization
         private void Start()
         {
             m_CharacterController = GetComponent<CharacterController>();
-           // m_Camera = Camera.main;
+            //m_Camera = Camera.main;
             m_OriginalCameraPosition = m_Camera.transform.localPosition;
             m_FovKick.Setup(m_Camera);
             m_HeadBob.Setup(m_Camera, m_StepInterval);
@@ -62,25 +72,29 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private void Update()
         {
             RotateView();
-            // the jump state needs to read here to make sure it is not missed
-            if (!m_Jump)
+            FireTimer += Time.deltaTime;
+            StaminaTimer += Time.deltaTime;
+            if (Stamina < 10 && StaminaTimer >= 2)
             {
-                m_Jump = CrossPlatformInputManager.GetButtonDown("Jump");
+                StaminaTimer = 0;
+                ++Stamina;
             }
-
-            if (!m_PreviouslyGrounded && m_CharacterController.isGrounded)
+            if (Input.GetKeyDown(KeyCode.Space) && FireTimer > Firedelay && Stamina>0)
             {
-                StartCoroutine(m_JumpBob.DoBobCycle());
-                PlayLandingSound();
-                m_MoveDir.y = 0f;
-                m_Jumping = false;
+                Vector3 pos =TargetTip.transform.position;
+                Quaternion rot = TargetTip.transform.rotation;
+                GameObject p = Instantiate(Projectile, pos, rot) as GameObject;
+                Rigidbody PRB = p.GetComponent<Rigidbody>();
+                Vector3 force = new Vector3();
+                force = rb.velocity + (PRB.transform.forward * ProjectileSpeed);
+                PRB.AddForce(new Vector3(force.x,force.y,force.z));
+                FireTimer = 0;
+                --Stamina;
             }
-            if (!m_CharacterController.isGrounded && !m_Jumping && m_PreviouslyGrounded)
+            if(!m_IsWalking && StaminaTimer == 0)
             {
-                m_MoveDir.y = 0f;
+                    Stamina -= 2;
             }
-
-            m_PreviouslyGrounded = m_CharacterController.isGrounded;
         }
 
 
@@ -91,14 +105,24 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_NextStep = m_StepCycle + .5f;
         }
 
+        void OnCollisionEnter(Collision other)
+        {
+            if (other.gameObject.tag == "IceBall")
+            {
+                if(Stamina>2)
+                {
+                    Debug.Log("Hit by an Ice ball...brrr");
+                    Stamina -= 2;
+                }
+            }
+        }
 
         private void FixedUpdate()
         {
             float speed;
             GetInput(out speed);
             // always move along the camera forward as it is the direction that it being aimed at
-            Vector3 desiredMove = transform.forward*m_Input.y + transform.right*m_Input.x;
-
+            Vector3 desiredMove = transform.forward;
             // get a normal for the surface that is being touched to move along it
             RaycastHit hitInfo;
             Physics.SphereCast(transform.position, m_CharacterController.radius, Vector3.down, out hitInfo,
@@ -107,24 +131,10 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
             m_MoveDir.x = desiredMove.x*speed;
             m_MoveDir.z = desiredMove.z*speed;
+            m_MoveDir.y = desiredMove.y*speed;
 
 
-            if (m_CharacterController.isGrounded)
-            {
-                m_MoveDir.y = -m_StickToGroundForce;
 
-                if (m_Jump)
-                {
-                    m_MoveDir.y = m_JumpSpeed;
-                    PlayJumpSound();
-                    m_Jump = false;
-                    m_Jumping = true;
-                }
-            }
-            else
-            {
-                m_MoveDir += Physics.gravity*m_GravityMultiplier*Time.fixedDeltaTime;
-            }
             m_CollisionFlags = m_CharacterController.Move(m_MoveDir*Time.fixedDeltaTime);
 
             ProgressStepCycle(speed);
@@ -190,12 +200,12 @@ namespace UnityStandardAssets.Characters.FirstPerson
                     m_HeadBob.DoHeadBob(m_CharacterController.velocity.magnitude +
                                       (speed*(m_IsWalking ? 1f : m_RunstepLenghten)));
                 newCameraPosition = m_Camera.transform.localPosition;
-                newCameraPosition.y = m_Camera.transform.localPosition.y - m_JumpBob.Offset();
+               // newCameraPosition.y = m_Camera.transform.localPosition.y - m_JumpBob.Offset();
             }
             else
             {
                 newCameraPosition = m_Camera.transform.localPosition;
-                newCameraPosition.y = m_OriginalCameraPosition.y - m_JumpBob.Offset();
+               // newCameraPosition.y = m_OriginalCameraPosition.y - m_JumpBob.Offset();
             }
             m_Camera.transform.localPosition = newCameraPosition;
         }
@@ -215,7 +225,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_IsWalking = !Input.GetKey(KeyCode.LeftShift);
 #endif
             // set the desired speed to be walking or running
-            speed = m_IsWalking ? m_WalkSpeed : m_RunSpeed;
+            speed = m_IsWalking &&Stamina > 0 ? m_WalkSpeed : m_RunSpeed;
             m_Input = new Vector2(horizontal, vertical);
 
             // normalize input if it exceeds 1 in combined length:

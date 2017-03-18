@@ -8,6 +8,8 @@ TagManager:
   - Terrain
   - Box
   - Dragon
+  - FireBall
+  - IceBall
   layers:
   - Default
   - TransparentFX
